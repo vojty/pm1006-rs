@@ -2,7 +2,7 @@
 name = "pm1006"
 description = "Platform-agnostic Rust driver for the pm1006 particulate matter sensor."
 authors = ["Tomáš Vojtášek <vojtasek.tomas@gmail.com>"]
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 license = "MIT"
 homepage = "https://github.com/vojty/pm1006-rs"

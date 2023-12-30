@@ -38,8 +38,6 @@ fn parse_response<E>(response: &[u8]) -> Result<u16, errors::Error<E>> {
     // PM2.5 = DF3 * 256 + DF4 (indexed from 1)
     let mut result: u16 = 0;
 
-    println!("init checksum: {:x}", checksum);
-
     // Loop through data
     for i in 0..length {
         let index = data_offset + i as usize;
