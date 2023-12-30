@@ -49,3 +49,13 @@ info!("PM2.5: {}ug/m3", pm25);
 | Hazardous                      | 401 – 500    | 350.5 – 500                    |
 
 Source https://aqicn.org/faq/2013-09-09/revised-pm25-aqi-breakpoints/
+
+## Development
+
+### Release new version
+
+1. Bump version in `Cargo.toml`
+2. Commit changes
+3. Tag commit with the version using `git tag -a v0.1.0 -m "v0.1.0"`
+4. Release with `cargo release`
+5. Push changes to GitHub
