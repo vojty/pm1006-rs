@@ -30,6 +30,22 @@ let uart_driver = UartDriver::new(
 
 let pm1006 = Pm1006::new(uart_driver);
 let pm25 = pm1006.read_pm25().unwrap();
-info!("PM2.5: {}", pm25);
+info!("PM2.5: {}ug/m3", pm25);
 
 ```
+
+## Additional info
+
+### Air Quality Index (AQI) breakpoints for PM2.5
+
+| AQI Category                   | Index Values | PM2.5 (ug/m3, 24-hour average) |
+| ------------------------------ | ------------ | ------------------------------ |
+| Good                           | 0 - 50       | 0.0 - 12.0                     |
+| Moderate                       | 51 - 100     | 12.1 - 35.4                    |
+| Unhealthy for Sensitive Groups | 101 – 150    | 35.5 – 55.4                    |
+| Unhealthy                      | 151 – 200    | 55.5 – 150.4                   |
+| Very Unhealthy                 | 201 – 300    | 150.5 – 250.4                  |
+| Hazardous                      | 301 – 400    | 250.5 – 350.4                  |
+| Hazardous                      | 401 – 500    | 350.5 – 500                    |
+
+Source https://aqicn.org/faq/2013-09-09/revised-pm25-aqi-breakpoints/
