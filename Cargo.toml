@@ -1,0 +1,13 @@
+[package]
+name = "pm1006"
+description = "Platform-agnostic Rust driver for the pm1006 particulate matter sensor."
+authors = ["Tomáš Vojtášek <vojtasek.tomas@gmail.com>"]
+version = "0.0.1"
+edition = "2021"
+
+[features]
+default = ["log"]
+
+[dependencies]
+embedded-io = "0.6.1"
+log = { version = "0.4", optional = true }
