@@ -28,7 +28,7 @@ let uart_driver = UartDriver::new(
 )
 .unwrap();
 
-let pm1006 = Pm1006::new(uart_driver);
+let mut pm1006 = Pm1006::new(uart_driver);
 let pm25 = pm1006.read_pm25().unwrap();
 info!("PM2.5: {}ug/m3", pm25);
 
