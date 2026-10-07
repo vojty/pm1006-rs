@@ -50,6 +50,11 @@ info!("PM2.5: {}ug/m3", pm25);
 
 Source https://aqicn.org/faq/2013-09-09/revised-pm25-aqi-breakpoints/
 
+## Acknowledgements
+
+This driver is based on [bertrik/pm1006](https://github.com/bertrik/pm1006/), an Arduino library for the PM1006 sensor by Bertrik Sikken.
+More details about the protocol can be found at [revspace.nl/VINDRIKTNING](https://revspace.nl/VINDRIKTNING).
+
 ## Development
 
 ### Release new version

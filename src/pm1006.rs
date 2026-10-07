@@ -53,16 +53,17 @@ fn parse_response<E>(response: &[u8; FRAME_LENGTH]) -> Result<u16, errors::Error
         return Err(errors::Error::InvalidCommandResponse(data[0]));
     }
 
-    let checksum = response[..DATA_OFFSET + length as usize]
+    // The checksum byte is chosen so that all bytes of the frame sum to 0
+    let sum = response[..DATA_OFFSET + length as usize]
         .iter()
         .fold(0u8, |sum, byte| sum.wrapping_add(*byte));
+    let calculated = 0u8.wrapping_sub(sum);
 
-    let expected_checksum = response[DATA_OFFSET + length as usize];
-    let diff = expected_checksum.wrapping_add(checksum);
-    if diff != 0 {
+    let expected = response[DATA_OFFSET + length as usize];
+    if expected != calculated {
         return Err(errors::Error::InvalidChecksum(ChecksumMismatch {
-            expected: expected_checksum,
-            calculated: checksum,
+            expected,
+            calculated,
         }));
     }
 
@@ -121,25 +122,59 @@ where
     }
 }
 
-#[derive(Debug)]
-pub struct ChecksumMismatch {
-    pub expected: u8,
-    pub calculated: u8,
+impl<Uart> Pm1006<Uart> {
+    /// Consumes the driver and returns the underlying UART
+    pub fn release(self) -> Uart {
+        self.uart
+    }
 }
 
+pub use errors::ChecksumMismatch;
+
 pub mod errors {
+    use core::fmt;
     use embedded_io::ReadExactError;
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct ChecksumMismatch {
+        /// Checksum byte received from the sensor
+        pub expected: u8,
+        /// Checksum calculated from the received frame
+        pub calculated: u8,
+    }
 
     #[derive(Debug)]
     pub enum Error<E> {
         InvalidHeader(u8),
         InvalidLength(u8),
         InvalidCommandResponse(u8),
-        InvalidChecksum(super::ChecksumMismatch),
+        InvalidChecksum(ChecksumMismatch),
         UnexpectedEof,
         SerialReadFail(E),
         SerialWriteFail(E),
     }
+
+    impl<E: fmt::Debug> fmt::Display for Error<E> {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match self {
+                Error::InvalidHeader(byte) => write!(f, "invalid response header: {byte:#04x}"),
+                Error::InvalidLength(length) => write!(f, "invalid response length: {length}"),
+                Error::InvalidCommandResponse(byte) => {
+                    write!(f, "invalid command in response: {byte:#04x}")
+                }
+                Error::InvalidChecksum(mismatch) => write!(
+                    f,
+                    "invalid checksum: expected {:#04x}, calculated {:#04x}",
+                    mismatch.expected, mismatch.calculated
+                ),
+                Error::UnexpectedEof => write!(f, "unexpected end of response"),
+                Error::SerialReadFail(e) => write!(f, "serial read failed: {e:?}"),
+                Error::SerialWriteFail(e) => write!(f, "serial write failed: {e:?}"),
+            }
+        }
+    }
+
+    impl<E: fmt::Debug> core::error::Error for Error<E> {}
 
     impl<E> From<ReadExactError<E>> for Error<E> {
         fn from(error: ReadExactError<E>) -> Self {
@@ -274,7 +309,37 @@ mod tests {
         let mut response = RESPONSE;
         response[19] = 0;
         let result = parse_response::<()>(&response);
-        assert!(matches!(result, Err(Error::InvalidChecksum(_))));
+        assert!(matches!(
+            result,
+            Err(Error::InvalidChecksum(ChecksumMismatch {
+                expected: 0,
+                calculated: 91,
+            }))
+        ));
+    }
+
+    #[test]
+    fn test_error_display() {
+        let error = Error::<()>::InvalidChecksum(ChecksumMismatch {
+            expected: 0,
+            calculated: 0x5b,
+        });
+        assert_eq!(
+            error.to_string(),
+            "invalid checksum: expected 0x00, calculated 0x5b"
+        );
+        assert_eq!(
+            Error::<()>::InvalidHeader(0x17).to_string(),
+            "invalid response header: 0x17"
+        );
+    }
+
+    #[test]
+    fn test_release() {
+        let mut sensor = Pm1006::new(MockUart::new(&RESPONSE, usize::MAX));
+        assert!(matches!(sensor.read_pm25(), Ok(9)));
+        let uart = sensor.release();
+        assert_eq!(uart.tx, COMMAND_SEQUENCE);
     }
 
     #[test]

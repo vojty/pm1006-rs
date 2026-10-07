@@ -10,7 +10,7 @@ checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
 
 [[package]]
 name = "pm1006"
-version = "0.0.2"
+version = "0.0.3"
 dependencies = [
  "embedded-io",
 ]

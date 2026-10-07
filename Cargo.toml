@@ -2,8 +2,9 @@
 name = "pm1006"
 description = "Platform-agnostic Rust driver for the pm1006 particulate matter sensor."
 authors = ["Tomáš Vojtášek <vojtasek.tomas@gmail.com>"]
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
+rust-version = "1.81"
 license = "MIT"
 homepage = "https://github.com/vojty/pm1006-rs"
 documentation = "https://github.com/vojty/pm1006-rs"
@@ -14,6 +15,8 @@ keywords = ["embedded", "pm1006", "particulate-matter", "air-quality"]
 include = [
     "src/**/*.rs",
     "Cargo.toml",
+    "README.md",
+    "LICENSE",
 ]
 
 [dependencies]
